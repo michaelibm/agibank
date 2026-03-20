@@ -245,6 +245,31 @@ router.post('/clientes', adminMiddleware, async (req, res) => {
   }
 });
 
+// ── DELETE /api/admin/clientes/:id — excluir cliente e todos os dados
+router.delete('/clientes/:id', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  try {
+    // Verifica se o cliente pertence a esta empresa
+    const { rows } = await pool.query(
+      'SELECT id, telefone FROM clientes WHERE id=$1 AND empresa_id=$2',
+      [req.params.id, eid]
+    );
+    if (!rows.length) return res.status(404).json({ error:'Cliente não encontrado.' });
+    const telefone = rows[0].telefone;
+
+    // Exclui empréstimos do cliente
+    await pool.query('DELETE FROM emprestimos WHERE cliente_id=$1 AND empresa_id=$2', [req.params.id, eid]);
+
+    // Exclui o cliente
+    await pool.query('DELETE FROM clientes WHERE id=$1 AND empresa_id=$2', [req.params.id, eid]);
+
+    // Remove o pré-cadastro vinculado (libera o telefone para novo cadastro)
+    await pool.query('DELETE FROM pre_cadastros WHERE telefone=$1 AND empresa_id=$2', [telefone, eid]);
+
+    return res.json({ ok:true });
+  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao excluir cliente.' }); }
+});
+
 // ── PATCH /api/admin/clientes/:id — editar cliente
 router.patch('/clientes/:id', adminMiddleware, async (req, res) => {
   const eid = req.user.empresa_id;

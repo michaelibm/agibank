@@ -15,8 +15,9 @@ export default function AdminClientes() {
   const [loading,   setLoading]   = useState(true);
   const [search,    setSearch]    = useState('');
   const [expanded,  setExpanded]  = useState(null);
-  const [editando,  setEditando]  = useState(null);   // objeto cliente
+  const [editando,  setEditando]  = useState(null);
   const [criando,   setCriando]   = useState(false);
+  const [delBusy,   setDelBusy]   = useState({});
   const [form,      setForm]      = useState(emptyForm());
   const [busy,      setBusy]      = useState(false);
   const [msg,       setMsg]       = useState('');
@@ -26,6 +27,16 @@ export default function AdminClientes() {
     api.adminClientes().then(setClientes).finally(()=>setLoading(false));
   };
   useEffect(load,[]);
+
+  const excluir = async (c) => {
+    if (!window.confirm(`Excluir "${c.nome}" permanentemente?\n\nTodos os empréstimos e o pré-cadastro serão removidos. Esta ação não pode ser desfeita.`)) return;
+    setDelBusy(b=>({...b,[c.id]:true}));
+    try {
+      await api.excluirCliente(c.id);
+      load();
+    } catch(e){ setMsg('❌ '+e.message); }
+    finally   { setDelBusy(b=>({...b,[c.id]:false})); }
+  };
 
   const openEdit = (c) => {
     setForm({
@@ -140,7 +151,12 @@ export default function AdminClientes() {
                   <span style={S.detVal}>{v}</span>
                 </div>
               ))}
-              <button onClick={()=>openEdit(c)} style={S.editBtn}>Editar dados</button>
+              <div style={{display:'flex',gap:8,marginTop:12}}>
+                <button onClick={()=>openEdit(c)} style={S.editBtn}>Editar dados</button>
+                <button onClick={()=>excluir(c)} disabled={delBusy[c.id]} style={S.delBtn}>
+                  {delBusy[c.id]?'...':'Excluir cliente'}
+                </button>
+              </div>
             </div>
           )}
         </Card>
@@ -216,7 +232,8 @@ const S = {
   detRow:  { display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid var(--border2)' },
   detLabel:{ color:'var(--muted)', fontSize:12, flexShrink:0, fontWeight:600 },
   detVal:  { fontSize:12, fontWeight:600, textAlign:'right', wordBreak:'break-all', maxWidth:'65%', color:'var(--text)' },
-  editBtn: { marginTop:12, width:'100%', background:'none', border:'1.5px solid var(--pink)', color:'var(--pink)', borderRadius:10, padding:'9px', fontSize:13, fontFamily:'inherit', fontWeight:700, cursor:'pointer' },
+  editBtn: { flex:1, background:'none', border:'1.5px solid var(--pink)', color:'var(--pink)', borderRadius:10, padding:'9px', fontSize:13, fontFamily:'inherit', fontWeight:700, cursor:'pointer' },
+  delBtn:  { flex:1, background:'none', border:'1.5px solid #FFCDD2', color:'var(--red)', borderRadius:10, padding:'9px', fontSize:13, fontFamily:'inherit', fontWeight:700, cursor:'pointer' },
   newBtn:  { background:'linear-gradient(135deg,#E91E8C,#F06292)', color:'#fff', border:'none', borderRadius:14, padding:'10px 18px', fontSize:13, fontWeight:700, fontFamily:'inherit', cursor:'pointer', boxShadow:'0 4px 14px rgba(233,30,140,.3)', whiteSpace:'nowrap' },
 };
 
