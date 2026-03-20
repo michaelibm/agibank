@@ -304,6 +304,23 @@ router.post('/pre-cadastros', adminMiddleware, async (req, res) => {
       'INSERT INTO pre_cadastros (empresa_id,telefone,nome,limite_credito) VALUES ($1,$2,$3,$4) RETURNING *',
       [eid, clean, nome, limite]
     );
+
+    // Busca slug da empresa para montar o link do sistema
+    const { rows: emp } = await pool.query(
+      'SELECT slug, nome AS empresa_nome FROM empresas WHERE id=$1', [eid]
+    );
+    const slug = emp[0]?.slug || '';
+    const empresa_nome = emp[0]?.empresa_nome || '';
+
+    notifyN8N(await getWebhook(eid), {
+      evento:       'pre_cadastro_criado',
+      nome,
+      telefone:     clean,
+      limite_credito: limite,
+      empresa_nome,
+      link_sistema: `${process.env.APP_URL || 'https://seudominio.com'}/?empresa=${slug}`,
+    });
+
     return res.status(201).json(rows[0]);
   } catch(e){
     if (e.code==='23505') return res.status(409).json({ error:'Telefone já pré-cadastrado.' });
