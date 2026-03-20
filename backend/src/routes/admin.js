@@ -248,26 +248,44 @@ router.post('/clientes', adminMiddleware, async (req, res) => {
 // ── DELETE /api/admin/clientes/:id — excluir cliente e todos os dados
 router.delete('/clientes/:id', adminMiddleware, async (req, res) => {
   const eid = req.user.empresa_id;
+  const client = await pool.connect();
   try {
-    // Verifica se o cliente pertence a esta empresa
-    const { rows } = await pool.query(
-      'SELECT id, telefone FROM clientes WHERE id=$1 AND empresa_id=$2',
+    await client.query('BEGIN');
+
+    const { rows } = await client.query(
+      'SELECT id, telefone, cpf, email FROM clientes WHERE id=$1 AND empresa_id=$2',
       [req.params.id, eid]
     );
-    if (!rows.length) return res.status(404).json({ error:'Cliente não encontrado.' });
-    const telefone = rows[0].telefone;
+    if (!rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ error:'Cliente não encontrado.' }); }
 
-    // Exclui empréstimos do cliente
-    await pool.query('DELETE FROM emprestimos WHERE cliente_id=$1 AND empresa_id=$2', [req.params.id, eid]);
+    const { telefone, cpf, email } = rows[0];
+    console.log(`[delete-cliente] id=${req.params.id} tel=${telefone} cpf=${cpf}`);
 
-    // Exclui o cliente
-    await pool.query('DELETE FROM clientes WHERE id=$1 AND empresa_id=$2', [req.params.id, eid]);
+    // 1. Remove empréstimos
+    const e1 = await client.query('DELETE FROM emprestimos WHERE cliente_id=$1', [req.params.id]);
+    console.log(`[delete-cliente] empréstimos removidos: ${e1.rowCount}`);
 
-    // Remove o pré-cadastro vinculado (libera o telefone para novo cadastro)
-    await pool.query('DELETE FROM pre_cadastros WHERE telefone=$1 AND empresa_id=$2', [telefone, eid]);
+    // 2. Remove o cliente
+    const e2 = await client.query('DELETE FROM clientes WHERE id=$1', [req.params.id]);
+    console.log(`[delete-cliente] cliente removido: ${e2.rowCount}`);
 
-    return res.json({ ok:true });
-  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao excluir cliente.' }); }
+    // 3. Remove pré-cadastro pelo telefone limpo
+    const telLimpo = telefone.replace(/\D/g,'');
+    const e3 = await client.query(
+      'DELETE FROM pre_cadastros WHERE regexp_replace(telefone,\'\\D\',\'\',\'g\')=$1 AND empresa_id=$2',
+      [telLimpo, eid]
+    );
+    console.log(`[delete-cliente] pré-cadastro removido: ${e3.rowCount}`);
+
+    await client.query('COMMIT');
+    return res.json({ ok:true, removidos:{ emprestimos:e1.rowCount, pre_cadastro:e3.rowCount } });
+  } catch(e){
+    await client.query('ROLLBACK');
+    console.error('[delete-cliente] erro:', e.message);
+    return res.status(500).json({ error:'Erro ao excluir cliente: '+e.message });
+  } finally {
+    client.release();
+  }
 });
 
 // ── PATCH /api/admin/clientes/:id — editar cliente
@@ -388,11 +406,30 @@ router.patch('/emprestimos/:id/renovar', adminMiddleware, async (req, res) => {
       [novaVenc.toISOString(), novaObs, req.params.id, eid]
     );
 
-    const { rows: cr } = await pool.query('SELECT nome FROM clientes WHERE id=$1',[emp.cliente_id]);
+    const { rows: cr } = await pool.query(
+      'SELECT nome, telefone, email, cpf, pix_tipo, pix_chave FROM clientes WHERE id=$1', [emp.cliente_id]
+    );
     await pool.query(
       `INSERT INTO caixa_transacoes (empresa_id, admin_id, tipo, valor, descricao) VALUES ($1,$2,'pagamento',$3,$4)`,
       [eid, req.user.id, juros, `Pagamento de juros — Renovação empréstimo #${emp.id} — ${cr[0]?.nome||''}`]
     );
+
+    notifyN8N(await getWebhook(eid), {
+      evento:           'pagamento_juros',
+      emprestimo_id:    emp.id,
+      valor_principal:  emp.valor,
+      valor_juros:      juros,
+      novo_vencimento:  novaVenc.toLocaleDateString('pt-BR'),
+      data_pagamento:   new Date().toLocaleString('pt-BR'),
+      cliente: {
+        nome:      cr[0]?.nome,
+        telefone:  cr[0]?.telefone,
+        email:     cr[0]?.email,
+        cpf:       cr[0]?.cpf,
+        pix_tipo:  cr[0]?.pix_tipo,
+        pix_chave: cr[0]?.pix_chave,
+      },
+    });
 
     return res.json(rows[0]);
   } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao renovar empréstimo.' }); }
