@@ -90,7 +90,7 @@ export default function Login({ onRegister }) {
               </Field>
               {err && <Alert type="error">{err}</Alert>}
               <Btn variant="lilac" onClick={handleAdmin} loading={loading}>Entrar como Admin</Btn>
-              <p style={S.demo}>Desenvolvedor: Michael Oliveira o ++ </p>
+              <p style={S.demo}>Desenvolvedor: Michael Oliveira  </p>
             </>
           )}
 
