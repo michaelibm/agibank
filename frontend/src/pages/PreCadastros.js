@@ -41,7 +41,7 @@ export default function PreCadastros() {
   return (
     <div style={S.wrap}>
       <div style={S.header}>
-        <p style={S.title}>Pré-Cadastros 📋</p>
+        <p style={S.title}>Pré-Cadastros</p>
         <p style={S.sub}>Apenas celulares listados aqui podem criar conta.</p>
       </div>
 
@@ -83,7 +83,7 @@ export default function PreCadastros() {
                 ? <span style={S.tagOk}>Cadastrado</span>
                 : <span style={S.tagWait}>Aguardando</span>
               }
-              <button onClick={()=>remover(p.id, p.nome)} style={S.removeBtn}>🗑 excluir</button>
+              <button onClick={()=>remover(p.id, p.nome)} style={S.removeBtn}>Excluir</button>
             </div>
           </div>
         </Card>

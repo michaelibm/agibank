@@ -11,18 +11,18 @@ export default function AdminDashboard({ onGotoSolicitacoes }) {
   if(loading) return <Spinner/>;
 
   const stats = [
-    { label:'Clientes',      val:data.clientes,      icon:'👥', color:'var(--pink)',   bg:'#FCE4EC' },
-    { label:'Pendentes',     val:data.pendentes,      icon:'⏳', color:'#E65100',       bg:'#FFF3E0' },
-    { label:'Aprovados',     val:data.aprovados,      icon:'✅', color:'#2E7D32',       bg:'#E8F5E9' },
-    { label:'Reprovados',    val:data.reprovados,     icon:'❌', color:'#C62828',       bg:'#FFEBEE' },
-    { label:'Pré-cadastros', val:data.pre_cadastros,  icon:'📋', color:'var(--lilac)',  bg:'#F3E5F5' },
+    { label:'Clientes',      val:data.clientes,     color:'var(--pink)', bg:'#FCE4EC' },
+    { label:'Pendentes',     val:data.pendentes,    color:'#E65100',     bg:'#FFF3E0' },
+    { label:'Aprovados',     val:data.aprovados,    color:'#2E7D32',     bg:'#E8F5E9' },
+    { label:'Reprovados',    val:data.reprovados,   color:'#C62828',     bg:'#FFEBEE' },
+    { label:'Pré-cadastros', val:data.pre_cadastros,color:'var(--lilac)',bg:'#F3E5F5' },
   ];
 
   return (
     <div style={S.wrap}>
       {/* Header */}
       <div style={S.header}>
-        <p style={S.title}>Dashboard 🌸</p>
+        <p style={S.title}>Dashboard</p>
         <p style={S.sub}>Visão geral do sistema</p>
       </div>
 
@@ -33,7 +33,7 @@ export default function AdminDashboard({ onGotoSolicitacoes }) {
             <p style={S.heroLabel}>Volume Total Solicitado</p>
             <p style={S.heroVal}>{fmt(data.volume)}</p>
           </div>
-          <span style={{fontSize:40,animation:'floatUp 4s ease-in-out infinite'}}>💰</span>
+          <span style={{fontSize:28,color:'rgba(255,255,255,.6)',fontFamily:"'Playfair Display',serif",fontWeight:700}}>R$</span>
         </div>
       </div>
 
@@ -41,7 +41,6 @@ export default function AdminDashboard({ onGotoSolicitacoes }) {
       <div style={S.grid}>
         {stats.map((s,i)=>(
           <div key={i} style={{...S.stat, background:s.bg}}>
-            <span style={S.statIcon}>{s.icon}</span>
             <p style={{...S.statVal, color:s.color}}>{s.val}</p>
             <p style={S.statLabel}>{s.label}</p>
           </div>
@@ -54,7 +53,7 @@ export default function AdminDashboard({ onGotoSolicitacoes }) {
           <div style={S.alert} onClick={onGotoSolicitacoes}>
             <div>
               <p style={{fontWeight:700,color:'#E65100',fontSize:15}}>
-                ⚠️ {data.pendentes} solicitação(ões) aguardando análise
+                {data.pendentes} solicitação(ões) aguardando análise
               </p>
               <p style={{color:'var(--muted)',fontSize:13,marginTop:4}}>Toque para analisar agora</p>
             </div>

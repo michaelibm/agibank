@@ -9,10 +9,10 @@ const fmtDate = (d) =>
   new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 
 const TIPO_LABEL = {
-  deposito:   { label:'Depósito',   icon:'⬆️', color:'#2E7D32', bg:'#E8F5E9' },
-  saque:      { label:'Saque',      icon:'⬇️', color:'#C62828', bg:'#FFEBEE' },
-  emprestimo: { label:'Empréstimo', icon:'💸', color:'#E65100', bg:'#FFF3E0' },
-  pagamento:  { label:'Recebimento',icon:'💰', color:'#1565C0', bg:'#E3F2FD' },
+  deposito:   { label:'Depósito',   icon:'+', color:'#2E7D32', bg:'#E8F5E9' },
+  saque:      { label:'Saque',      icon:'−', color:'#C62828', bg:'#FFEBEE' },
+  emprestimo: { label:'Empréstimo', icon:'S', color:'#E65100', bg:'#FFF3E0' },
+  pagamento:  { label:'Recebimento',icon:'R', color:'#1565C0', bg:'#E3F2FD' },
 };
 
 export default function Financeiro() {
@@ -58,7 +58,7 @@ export default function Financeiro() {
           {fmt(saldo)}
         </p>
         <p style={S.saldoSub}>
-          {saldoPositivo ? '✅ Caixa positivo' : '⚠️ Caixa negativo'}
+          {saldoPositivo ? 'Caixa positivo' : 'Caixa negativo'}
         </p>
       </Card>
 
@@ -70,7 +70,7 @@ export default function Financeiro() {
           {['deposito','saque'].map(t => (
             <button key={t} onClick={()=>setTipo(t)}
               style={{ ...S.tipoBtn, ...(tipo===t ? { background: TIPO_LABEL[t].bg, color: TIPO_LABEL[t].color, borderColor: TIPO_LABEL[t].color } : {}) }}>
-              {TIPO_LABEL[t].icon} {TIPO_LABEL[t].label}
+              {TIPO_LABEL[t].label}
             </button>
           ))}
         </div>
@@ -101,7 +101,7 @@ export default function Financeiro() {
           loading={saving}
           variant={tipo==='saque' ? 'lilac' : undefined}
         >
-          {TIPO_LABEL[tipo].icon} Registrar {TIPO_LABEL[tipo].label}
+          Registrar {TIPO_LABEL[tipo].label}
         </Btn>
       </Card>
 
@@ -116,7 +116,7 @@ export default function Financeiro() {
               return (
                 <div key={t.id} style={S.item}>
                   <div style={{ ...S.itemIcon, background: meta.bg }}>
-                    <span style={{ fontSize:18 }}>{meta.icon}</span>
+                    <span style={{ fontSize:13, fontWeight:800, color:meta.color }}>{meta.icon}</span>
                   </div>
                   <div style={S.itemInfo}>
                     <span style={S.itemTipo}>{meta.label}</span>

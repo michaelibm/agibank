@@ -20,10 +20,9 @@ export default function ClientHome({ onSolicitar }) {
       {/* Hero banner */}
       <div style={S.hero}>
         <div style={S.heroContent}>
-          <p style={S.greet}>Olá, {user?.nome?.split(' ')[0]} 💕</p>
-          <p style={S.heroSub}>Seu crédito com carinho</p>
+          <p style={S.greet}>Olá, {user?.nome?.split(' ')[0]}</p>
+          <p style={S.heroSub}>Bem-vindo ao seu painel</p>
         </div>
-        <div style={S.heroEmoji}>🌸</div>
       </div>
 
       {/* Stats */}
@@ -43,7 +42,7 @@ export default function ClientHome({ onSolicitar }) {
       {/* Vencimentos */}
       {aprovados.length>0 && (
         <div style={{padding:'0 16px 4px'}}>
-          <p style={S.sectionTitle}>📅 Vencimentos</p>
+          <p style={S.sectionTitle}>Vencimentos</p>
           <Card style={{padding:0, overflow:'hidden'}}>
             {aprovados.map((l,i)=>{
               const d=diasR(l.data_vencimento);
@@ -71,7 +70,7 @@ export default function ClientHome({ onSolicitar }) {
       <div style={{padding:'16px'}}>
         <div style={S.cta} onClick={onSolicitar}>
           <div>
-            <p style={S.ctaTitle}>Precisa de crédito? 💗</p>
+            <p style={S.ctaTitle}>Solicitar Crédito</p>
             <p style={S.ctaSub}>Aprovação em até 24 horas</p>
           </div>
           <div style={S.ctaBtn}>→</div>
@@ -108,7 +107,6 @@ const S = {
   heroContent: { flex:1 },
   greet:       { fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:24, color:'var(--text)' },
   heroSub:     { color:'var(--pink-soft)', fontSize:14, marginTop:4, fontWeight:600 },
-  heroEmoji:   { fontSize:52, animation:'floatUp 4s ease-in-out infinite' },
   statsRow:    { display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, padding:'0 16px', marginBottom:16 },
   stat:        { borderRadius:'var(--radius-sm)', padding:'12px 8px', textAlign:'center', border:'1.5px solid var(--border2)' },
   statVal:     { fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:24 },

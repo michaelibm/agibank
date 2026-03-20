@@ -37,7 +37,7 @@ export default function AdminSolicitacoes() {
   return (
     <div style={S.wrap}>
       <div style={S.header}>
-        <p style={S.title}>Solicitações 📄</p>
+        <p style={S.title}>Solicitações</p>
       </div>
 
       <TermoModal emprestimo={termoEmp} onClose={()=>setTermoEmp(null)}/>
@@ -95,15 +95,15 @@ export default function AdminSolicitacoes() {
                 style={{marginBottom:10,fontSize:13,resize:'none'}}
               />
               <div style={S.btnRow}>
-                <Btn variant="success" onClick={()=>decidir(l.id,'aprovado')} loading={busy[l.id]} style={{flex:1}}>✓ Aprovar</Btn>
-                <Btn variant="danger"  onClick={()=>decidir(l.id,'reprovado')} loading={busy[l.id]} style={{flex:1}}>✗ Reprovar</Btn>
+                <Btn variant="success" onClick={()=>decidir(l.id,'aprovado')} loading={busy[l.id]} style={{flex:1}}>Aprovar</Btn>
+                <Btn variant="danger"  onClick={()=>decidir(l.id,'reprovado')} loading={busy[l.id]} style={{flex:1}}>Reprovar</Btn>
               </div>
             </div>
           )}
           {l.observacao && <p style={S.obs}>Obs: {l.observacao}</p>}
           {l.termo_aceito_em && (
             <button onClick={()=>setTermoEmp(l)} style={S.termoBtn}>
-              📋 Ver Termo de Contratação · Aceito em {new Date(l.termo_aceito_em).toLocaleString('pt-BR')}
+              Ver Termo de Contratação · Aceito em {new Date(l.termo_aceito_em).toLocaleString('pt-BR')}
             </button>
           )}
         </Card>

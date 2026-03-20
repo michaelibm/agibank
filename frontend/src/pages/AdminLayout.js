@@ -11,11 +11,11 @@ import AdminUsuarios     from './AdminUsuarios';
 
 const TABS = [
   { id:'dashboard',    label:'Dashboard',  icon:'📊' },
-  { id:'solicitacoes', label:'Análise',    icon:'📄' },
+  { id:'solicitacoes', label:'Análise',    icon:'📋' },
   { id:'prazos',       label:'Prazos',     icon:'📅' },
   { id:'clientes',     label:'Clientes',   icon:'👥' },
-  { id:'pre',          label:'Pré-Cad.',   icon:'📋' },
-  { id:'financeiro',   label:'Financeiro', icon:'💰' },
+  { id:'pre',          label:'Pré-Cad.',   icon:'📁' },
+  { id:'financeiro',   label:'Financeiro', icon:'💳' },
   { id:'usuarios',     label:'Usuários',   icon:'👤' },
 ];
 
@@ -28,7 +28,7 @@ export default function AdminLayout() {
       <div style={S.topBar}>
         <Logo size="sm"/>
         <div style={S.right}>
-          <span style={S.badge}>⚙️ Admin</span>
+          <span style={S.badge}>Admin</span>
           <button onClick={logout} style={S.logoutBtn}>Sair</button>
         </div>
       </div>
@@ -47,8 +47,8 @@ export default function AdminLayout() {
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)}
             style={{...S.navBtn,...(tab===t.id?S.navActive:{})}}>
-            <span style={{fontSize:tab===t.id?20:18}}>{t.icon}</span>
-            <span style={{fontSize:9,marginTop:3,fontWeight:tab===t.id?800:500}}>{t.label}</span>
+            <span style={{fontSize:tab===t.id?19:17}}>{t.icon}</span>
+            <span style={{fontSize:9,marginTop:2,fontWeight:tab===t.id?800:500}}>{t.label}</span>
             {tab===t.id && <div style={S.navInd}/>}
           </button>
         ))}

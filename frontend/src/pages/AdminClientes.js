@@ -95,7 +95,7 @@ export default function AdminClientes() {
       <div style={S.header}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
           <div>
-            <p style={S.title}>Clientes 👥</p>
+            <p style={S.title}>Clientes</p>
             <p style={S.count}>{clientes.length} cadastrado(s)</p>
           </div>
           <button onClick={openCriar} style={S.newBtn}>+ Novo Cliente</button>
@@ -108,7 +108,7 @@ export default function AdminClientes() {
       />
 
       {filtered.length===0 && (
-        <div style={S.empty}><p style={{fontSize:36}}>🌸</p><p style={{color:'var(--muted)',marginTop:12}}>Nenhum cliente encontrado.</p></div>
+        <div style={S.empty}><p style={{fontSize:36}}></p><p style={{color:'var(--muted)',marginTop:12}}>Nenhum cliente encontrado.</p></div>
       )}
 
       {filtered.map(c=>(
@@ -140,7 +140,7 @@ export default function AdminClientes() {
                   <span style={S.detVal}>{v}</span>
                 </div>
               ))}
-              <button onClick={()=>openEdit(c)} style={S.editBtn}>✏️ Editar dados</button>
+              <button onClick={()=>openEdit(c)} style={S.editBtn}>Editar dados</button>
             </div>
           )}
         </Card>

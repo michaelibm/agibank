@@ -33,8 +33,8 @@ export default function Login({ onRegister }) {
 
 
   const TABS = [
-    { id:'cliente', label:'👩 Cliente' },
-    { id:'admin',   label:'⚙️ Administrador' },
+    { id:'cliente', label:'Cliente' },
+    { id:'admin',   label:'Administrador' },
   ];
 
   return (
@@ -42,8 +42,7 @@ export default function Login({ onRegister }) {
       <Dots/>
       <div style={S.inner}>
         <div style={S.hero}>
-          <div style={S.logoBox}><img src="/EMG.jpeg" alt="Logo" style={S.logoImg}/></div>
-          <p style={S.heroTag}>✨ Crédito com carinho</p>
+          <img src="/EMG.jpeg" alt="Logo" style={S.logoImg}/>
         </div>
 
         <div style={S.tabs}>
@@ -58,7 +57,7 @@ export default function Login({ onRegister }) {
         <Card style={S.card}>
           {tab==='cliente' && (
             <>
-              <h2 style={S.cardTitle}>Bem-vinda de volta 💕</h2>
+              <h2 style={S.cardTitle}>Acesso ao Sistema</h2>
               <Field label="CPF">
                 <input value={cpf} onChange={e=>{setCpf(maskCPF(e.target.value));reset();}}
                   placeholder="000.000.000-00" inputMode="numeric"/>
@@ -68,15 +67,15 @@ export default function Login({ onRegister }) {
                   placeholder="••••••"/>
               </Field>
               {err && <Alert type="error">{err}</Alert>}
-              <Btn onClick={handleCliente} loading={loading}>Entrar 💗</Btn>
+              <Btn onClick={handleCliente} loading={loading}>Entrar</Btn>
               <div style={S.divRow}><span style={S.line}/><span style={S.or}>ou</span><span style={S.line}/></div>
-              <Btn variant="ghost" onClick={onRegister}>Criar minha conta ✨</Btn>
+              <Btn variant="ghost" onClick={onRegister}>Criar minha conta</Btn>
             </>
           )}
 
           {tab==='admin' && (
             <>
-              <h2 style={S.cardTitle}>Painel Admin 🌸</h2>
+              <h2 style={S.cardTitle}>Painel Administrativo</h2>
               <Field label="Código da Empresa">
                 <input value={slug} onChange={e=>{setSlug(e.target.value.toLowerCase());reset();}}
                   placeholder="ex: agibank" autoCapitalize="none"/>
@@ -91,13 +90,13 @@ export default function Login({ onRegister }) {
               </Field>
               {err && <Alert type="error">{err}</Alert>}
               <Btn variant="lilac" onClick={handleAdmin} loading={loading}>Entrar como Admin</Btn>
-              <p style={S.demo}>Demo: Desenvolvedor: Michael Oliveira o ++ </p>
+              <p style={S.demo}>Desenvolvedor: Michael Oliveira o ++ </p>
             </>
           )}
 
         </Card>
 
-        <div style={S.flowers}>🌸 🌷 🌺 🌸</div>
+        <div style={S.flowers}/>
       </div>
     </div>
   );
@@ -107,9 +106,7 @@ const S = {
   wrap:      { minHeight:'100dvh',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px 16px',position:'relative',overflow:'hidden' },
   inner:     { width:'100%',maxWidth:400,position:'relative',zIndex:1 },
   hero:      { textAlign:'center',marginBottom:24 },
-  logoBox:   { display:'inline-flex',background:'#fff',borderRadius:20,padding:'12px 22px',boxShadow:'0 8px 32px rgba(233,30,140,.15)',marginBottom:12 },
-  logoImg:   { height:60,objectFit:'contain' },
-  heroTag:   { color:'var(--pink-soft)',fontSize:13,fontWeight:700,letterSpacing:.5 },
+  logoImg:   { height:72, objectFit:'contain', display:'block', margin:'0 auto' },
   tabs:      { display:'flex',background:'#fff',border:'1.5px solid var(--border2)',borderRadius:'var(--radius)',padding:4,marginBottom:16,boxShadow:'var(--shadow-sm)' },
   tab:       { flex:1,border:'none',background:'none',color:'var(--muted)',cursor:'pointer',padding:'9px 4px',borderRadius:14,fontSize:12,fontFamily:'inherit',transition:'all .2s',fontWeight:600 },
   tabActive: { background:'linear-gradient(135deg,#FCE4EC,#F8BBD9)',color:'var(--pink)',fontWeight:800 },

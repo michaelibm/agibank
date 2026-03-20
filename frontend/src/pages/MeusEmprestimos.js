@@ -15,17 +15,17 @@ export default function MeusEmprestimos({ onSolicitar }) {
 
   if(!loans.length) return (
     <div style={S.empty}>
-      <p style={{fontSize:56,marginBottom:16}}>🌸</p>
+      <p style={{fontSize:56,marginBottom:16,color:'var(--border)'}}>—</p>
       <p style={S.emptyTitle}>Nenhuma solicitação ainda</p>
       <p style={S.emptySub}>Solicite seu primeiro crédito agora!</p>
-      <Btn onClick={onSolicitar} style={{maxWidth:260,marginTop:20}}>Solicitar Crédito 💗</Btn>
+      <Btn onClick={onSolicitar} style={{maxWidth:260,marginTop:20}}>Solicitar Crédito</Btn>
     </div>
   );
 
   return (
     <div style={S.wrap}>
       <div style={S.header}>
-        <p style={S.title}>Meus Créditos 📋</p>
+        <p style={S.title}>Meus Créditos</p>
         <p style={S.count}>{loans.length} solicitação(ões)</p>
       </div>
 
@@ -75,7 +75,7 @@ export default function MeusEmprestimos({ onSolicitar }) {
                   <p style={{fontSize:11,color:'var(--muted)',marginTop:4}}>Progresso do prazo</p>
                 </div>
                 <div style={S.pixBox}>
-                  <span style={{fontSize:20}}>💠</span>
+                  <span style={{fontSize:14,fontWeight:800,color:'var(--pink)'}}>PIX</span>
                   <div>
                     <p style={{fontSize:12,color:'var(--muted)'}}>Pague via Pix</p>
                     <p style={{fontWeight:700,fontSize:13,color:'var(--text)'}}>CNPJ: 00.000.000/0001-00</p>
@@ -87,20 +87,20 @@ export default function MeusEmprestimos({ onSolicitar }) {
             {status==='em_analise' && (
               <div style={S.analise}>
                 <div style={S.pulseDot}/>
-                <p style={{color:'#E65100',fontSize:13,fontWeight:600}}>Aguardando análise... 🌸</p>
+                <p style={{color:'#E65100',fontSize:13,fontWeight:600}}>Aguardando análise...</p>
               </div>
             )}
 
             {status==='reprovado' && (
               <div style={S.reprovado}>
-                <p style={{color:'var(--red)',fontSize:13,fontWeight:600}}>❌ Não aprovado. Entre em contato com a AGIBANK.</p>
+                <p style={{color:'var(--red)',fontSize:13,fontWeight:600}}>Não aprovado. Entre em contato com a AGIBANK.</p>
                 {l.observacao && <p style={{color:'var(--muted)',fontSize:12,marginTop:6}}>Motivo: {l.observacao}</p>}
               </div>
             )}
 
             {l.termo_aceito_em && (
               <button onClick={()=>setTermoEmp(l)} style={S.termoBtn}>
-                📋 Ver Termo de Contratação
+                Ver Termo de Contratação
               </button>
             )}
           </Card>

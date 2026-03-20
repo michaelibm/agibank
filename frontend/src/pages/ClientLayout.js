@@ -7,7 +7,7 @@ import { Logo }        from '../components/UI';
 
 const TABS = [
   { id:'home',        label:'Início',    icon:'🏠' },
-  { id:'solicitar',   label:'Crédito',   icon:'💰' },
+  { id:'solicitar',   label:'Crédito',   icon:'💳' },
   { id:'emprestimos', label:'Histórico', icon:'📋' },
   { id:'perfil',      label:'Perfil',    icon:'👤' },
 ];
@@ -37,8 +37,8 @@ export default function ClientLayout() {
       <nav style={S.nav} className="safe-bottom">
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} style={{...S.navBtn,...(tab===t.id?S.navActive:{})}}>
-            <span style={{fontSize:tab===t.id?22:20,transition:'font-size .2s'}}>{t.icon}</span>
-            <span style={{fontSize:10,marginTop:3,fontWeight:tab===t.id?800:500}}>{t.label}</span>
+            <span style={{fontSize:tab===t.id?21:19}}>{t.icon}</span>
+            <span style={{fontSize:10,marginTop:2,fontWeight:tab===t.id?800:500}}>{t.label}</span>
             {tab===t.id && <div style={S.navIndicator}/>}
           </button>
         ))}

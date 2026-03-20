@@ -66,7 +66,7 @@ export default function AdminUsuarios() {
       <div style={S.header}>
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
           <div>
-            <p style={S.title}>Usuários 👤</p>
+            <p style={S.title}>Usuários</p>
             <p style={S.sub}>Administradores com acesso ao sistema</p>
           </div>
           <button onClick={openCriar} style={S.newBtn}>+ Novo Usuário</button>
@@ -96,14 +96,14 @@ export default function AdminUsuarios() {
               <p style={S.data}>Cadastrado em {fmtDate(u.criado_em)}</p>
             </div>
             <div style={{display:'flex',flexDirection:'column',gap:6,alignItems:'flex-end'}}>
-              <button onClick={()=>openEdit(u)} style={S.editBtn}>✏️ Editar</button>
+              <button onClick={()=>openEdit(u)} style={S.editBtn}>Editar</button>
               {u.id!==user?.id && (
                 <button
                   onClick={()=>excluir(u)}
                   disabled={delBusy[u.id]}
                   style={S.delBtn}
                 >
-                  {delBusy[u.id]?'...':'🗑 Excluir'}
+                  {delBusy[u.id]?'...':'Excluir'}
                 </button>
               )}
             </div>
