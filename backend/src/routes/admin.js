@@ -31,6 +31,70 @@ const getWebhook = async (empresa_id) => {
   return rows[0]?.n8n_webhook;
 };
 
+// ── GET /api/admin/usuarios
+router.get('/usuarios', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, nome, login, ativo, criado_em FROM administradores WHERE empresa_id=$1 ORDER BY criado_em DESC`,
+      [eid]
+    );
+    return res.json(rows);
+  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao buscar usuários.' }); }
+});
+
+// ── POST /api/admin/usuarios
+router.post('/usuarios', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  const { nome, login, senha } = req.body;
+  if (!nome || !login || !senha) return res.status(400).json({ error:'Nome, login e senha são obrigatórios.' });
+  try {
+    const hash = await bcrypt.hash(senha, 10);
+    const { rows } = await pool.query(
+      `INSERT INTO administradores (empresa_id, nome, login, senha_hash) VALUES ($1,$2,$3,$4) RETURNING id,nome,login,ativo,criado_em`,
+      [eid, nome, login, hash]
+    );
+    return res.status(201).json(rows[0]);
+  } catch(e){
+    if (e.code==='23505') return res.status(409).json({ error:'Login já existe nesta empresa.' });
+    console.error(e); return res.status(500).json({ error:'Erro ao criar usuário.' });
+  }
+});
+
+// ── PATCH /api/admin/usuarios/:id
+router.patch('/usuarios/:id', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  const { nome, senha } = req.body;
+  try {
+    let query, params;
+    if (senha) {
+      const hash = await bcrypt.hash(senha, 10);
+      query = `UPDATE administradores SET nome=$1, senha_hash=$2 WHERE id=$3 AND empresa_id=$4 RETURNING id,nome,login,ativo`;
+      params = [nome, hash, req.params.id, eid];
+    } else {
+      query = `UPDATE administradores SET nome=$1 WHERE id=$2 AND empresa_id=$3 RETURNING id,nome,login,ativo`;
+      params = [nome, req.params.id, eid];
+    }
+    const { rows } = await pool.query(query, params);
+    if (!rows.length) return res.status(404).json({ error:'Usuário não encontrado.' });
+    return res.json(rows[0]);
+  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao atualizar.' }); }
+});
+
+// ── DELETE /api/admin/usuarios/:id
+router.delete('/usuarios/:id', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  if (parseInt(req.params.id) === req.user.id)
+    return res.status(400).json({ error:'Você não pode excluir sua própria conta.' });
+  try {
+    const { rowCount } = await pool.query(
+      `DELETE FROM administradores WHERE id=$1 AND empresa_id=$2`, [req.params.id, eid]
+    );
+    if (!rowCount) return res.status(404).json({ error:'Não encontrado.' });
+    return res.json({ ok:true });
+  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao excluir.' }); }
+});
+
 // ── GET /api/admin/dashboard
 router.get('/dashboard', adminMiddleware, async (req, res) => {
   const eid = req.user.empresa_id;

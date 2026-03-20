@@ -54,6 +54,12 @@ export const api = {
   caixa:           ()               => req('GET',  '/admin/caixa'),
   caixaMovimento:  (tipo,valor,descricao) => req('POST', '/admin/caixa', { tipo, valor, descricao }),
 
+  // ── Usuários admin
+  usuarios:       ()          => req('GET',    '/admin/usuarios'),
+  criarUsuario:   (data)      => req('POST',   '/admin/usuarios', data),
+  editarUsuario:  (id, data)  => req('PATCH',  `/admin/usuarios/${id}`, data),
+  excluirUsuario: (id)        => req('DELETE', `/admin/usuarios/${id}`),
+
   // ── Super Admin
   saStats:   ()    => req('GET',  '/superadmin/stats'),
   saEmpresas:()    => req('GET',  '/superadmin/empresas'),

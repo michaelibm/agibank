@@ -7,6 +7,7 @@ import AdminClientes     from './AdminClientes';
 import PreCadastros      from './PreCadastros';
 import ControlePrazos    from './ControlePrazos';
 import Financeiro        from './Financeiro';
+import AdminUsuarios     from './AdminUsuarios';
 
 const TABS = [
   { id:'dashboard',    label:'Dashboard',  icon:'📊' },
@@ -15,6 +16,7 @@ const TABS = [
   { id:'clientes',     label:'Clientes',   icon:'👥' },
   { id:'pre',          label:'Pré-Cad.',   icon:'📋' },
   { id:'financeiro',   label:'Financeiro', icon:'💰' },
+  { id:'usuarios',     label:'Usuários',   icon:'👤' },
 ];
 
 export default function AdminLayout() {
@@ -38,6 +40,7 @@ export default function AdminLayout() {
         {tab==='clientes'     && <AdminClientes/>}
         {tab==='pre'          && <PreCadastros/>}
         {tab==='financeiro'   && <Financeiro/>}
+        {tab==='usuarios'     && <AdminUsuarios/>}
       </div>
 
       <nav style={S.nav} className="safe-bottom">
