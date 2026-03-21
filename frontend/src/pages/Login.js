@@ -42,7 +42,7 @@ export default function Login({ onRegister }) {
       <Dots/>
       <div style={S.inner}>
         <div style={S.hero}>
-          <img src="/EMG.jpeg" alt="Logo" style={S.logoImg}/>
+          <img src="/EMG.png" alt="Logo" style={S.logoImg}/>
         </div>
 
         <div style={S.tabs}>
@@ -106,7 +106,7 @@ const S = {
   wrap:      { minHeight:'100dvh',display:'flex',alignItems:'center',justifyContent:'center',padding:'24px 16px',position:'relative',overflow:'hidden' },
   inner:     { width:'100%',maxWidth:400,position:'relative',zIndex:1 },
   hero:      { textAlign:'center',marginBottom:24 },
-  logoImg:   { height:72, objectFit:'contain', display:'block', margin:'0 auto' },
+  logoImg:   { height:90, objectFit:'contain', display:'block', margin:'0 auto', filter:'drop-shadow(0 6px 18px rgba(0,0,0,0.25))' },
   tabs:      { display:'flex',background:'#fff',border:'1.5px solid var(--border2)',borderRadius:'var(--radius)',padding:4,marginBottom:16,boxShadow:'var(--shadow-sm)' },
   tab:       { flex:1,border:'none',background:'none',color:'var(--muted)',cursor:'pointer',padding:'9px 4px',borderRadius:14,fontSize:12,fontFamily:'inherit',transition:'all .2s',fontWeight:600 },
   tabActive: { background:'linear-gradient(135deg,#FCE4EC,#F8BBD9)',color:'var(--pink)',fontWeight:800 },

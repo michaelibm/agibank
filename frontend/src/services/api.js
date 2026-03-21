@@ -53,7 +53,8 @@ export const api = {
   addPreCadastro:  (telefone, nome, limite_credito) => req('POST', '/admin/pre-cadastros', { telefone, nome, limite_credito }),
   removePreCadastro:(id) => req('DELETE', `/admin/pre-cadastros/${id}`),
   caixa:           ()               => req('GET',  '/admin/caixa'),
-  caixaMovimento:  (tipo,valor,descricao) => req('POST', '/admin/caixa', { tipo, valor, descricao }),
+  caixaMovimento:  (tipo,valor,descricao) => req('POST',  '/admin/caixa', { tipo, valor, descricao }),
+  caixaCancelar:   (id, motivo)          => req('PATCH', `/admin/caixa/${id}/cancelar`, { motivo }),
 
   // ── Usuários admin
   usuarios:       ()          => req('GET',    '/admin/usuarios'),

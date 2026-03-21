@@ -2,12 +2,15 @@ import React from 'react';
 
 // ─── LOGO ─────────────────────────────────────────────────────────────────
 export const Logo = ({ size = 'md' }) => {
-  const h = size === 'sm' ? 36 : 52;
+  const h = size === 'sm' ? 40 : 58;
   return (
     <img
-      src="/EMG.jpeg"
+      src="/EMG.png"
       alt="Logo"
-      style={{ height:h, width:'auto', objectFit:'contain', display:'block' }}
+      style={{
+        height: h, width:'auto', objectFit:'contain', display:'block',
+        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.22))',
+      }}
     />
   );
 };

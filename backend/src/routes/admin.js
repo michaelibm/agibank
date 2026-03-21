@@ -444,9 +444,16 @@ router.get('/caixa', adminMiddleware, async (req, res) => {
   try {
     const [saldoRes, transacoesRes] = await Promise.all([
       pool.query(`
-        SELECT
-          COALESCE(SUM(CASE WHEN tipo IN ('deposito','pagamento') THEN valor ELSE -valor END), 0) AS saldo
-        FROM caixa_transacoes WHERE empresa_id=$1
+        SELECT COALESCE(SUM(
+          CASE
+            WHEN tipo = 'cancelamento' AND ref_tipo IN ('deposito','pagamento') THEN -valor
+            WHEN tipo = 'cancelamento' AND ref_tipo IN ('saque','emprestimo')   THEN  valor
+            WHEN tipo IN ('deposito','pagamento') THEN  valor
+            ELSE -valor
+          END
+        ), 0) AS saldo
+        FROM caixa_transacoes
+        WHERE empresa_id=$1 AND (cancelado IS NULL OR cancelado = false)
       `, [eid]),
       pool.query(`
         SELECT t.*, a.nome AS admin_nome
@@ -461,6 +468,35 @@ router.get('/caixa', adminMiddleware, async (req, res) => {
       transacoes: transacoesRes.rows,
     });
   } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao buscar caixa.' }); }
+});
+
+// ── PATCH /api/admin/caixa/:id/cancelar  — cancelar transação
+router.patch('/caixa/:id/cancelar', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  const id  = parseInt(req.params.id);
+  const { motivo } = req.body;
+  const client = await pool.connect();
+  try {
+    const { rows } = await client.query(
+      `SELECT * FROM caixa_transacoes WHERE id=$1 AND empresa_id=$2 AND (cancelado IS NULL OR cancelado=false) AND tipo!='cancelamento'`,
+      [id, eid]
+    );
+    if (!rows.length) return res.status(404).json({ error:'Transação não encontrada ou já cancelada.' });
+    const orig = rows[0];
+    await client.query('BEGIN');
+    await client.query(`UPDATE caixa_transacoes SET cancelado=true WHERE id=$1`, [id]);
+    await client.query(
+      `INSERT INTO caixa_transacoes (empresa_id, admin_id, tipo, valor, descricao, ref_tipo)
+       VALUES ($1,$2,'cancelamento',$3,$4,$5)`,
+      [eid, req.user.id, orig.valor, `Cancelamento de ${orig.tipo} #${orig.id}${motivo ? ' — ' + motivo : ''}`, orig.tipo]
+    );
+    await client.query('COMMIT');
+    return res.json({ ok: true });
+  } catch(e){
+    await client.query('ROLLBACK');
+    console.error(e);
+    return res.status(500).json({ error:'Erro ao cancelar transação.' });
+  } finally { client.release(); }
 });
 
 // ── POST /api/admin/caixa  — registrar movimentação manual

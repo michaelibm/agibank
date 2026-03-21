@@ -40,6 +40,32 @@ pool.query(`
 `).then(() => console.log('[db] clientes pode_pagar_juros OK'))
   .catch(e  => console.error('[db] migrate pode_pagar_juros error:', e.message));
 
+pool.query(`
+  ALTER TABLE caixa_transacoes
+    ADD COLUMN IF NOT EXISTS cancelado BOOLEAN DEFAULT false,
+    ADD COLUMN IF NOT EXISTS ref_tipo  TEXT
+`).then(() => console.log('[db] caixa cancelamento cols OK'))
+  .catch(e  => console.error('[db] migrate caixa cancelamento error:', e.message));
+
+pool.query(`
+  DO $$ BEGIN
+    ALTER TABLE caixa_transacoes DROP CONSTRAINT IF EXISTS caixa_transacoes_tipo_check;
+    EXCEPTION WHEN undefined_object THEN NULL;
+  END $$
+`).catch(() => {});
+pool.query(`
+  DO $$ BEGIN
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_constraint WHERE conname = 'caixa_tipo_check_v2'
+    ) THEN
+      ALTER TABLE caixa_transacoes
+        ADD CONSTRAINT caixa_tipo_check_v2
+        CHECK (tipo IN ('deposito','saque','emprestimo','pagamento','cancelamento'));
+    END IF;
+  END $$
+`).then(() => console.log('[db] caixa tipo check OK'))
+  .catch(e  => console.error('[db] caixa tipo check error:', e.message));
+
 const authRoutes        = require('./routes/auth');
 const emprestimosRoutes = require('./routes/emprestimos');
 const adminRoutes       = require('./routes/admin');
