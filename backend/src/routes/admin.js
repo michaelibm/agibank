@@ -446,14 +446,14 @@ router.get('/caixa', adminMiddleware, async (req, res) => {
       pool.query(`
         SELECT COALESCE(SUM(
           CASE
-            WHEN tipo = 'cancelamento' AND ref_tipo IN ('deposito','pagamento') THEN -valor
-            WHEN tipo = 'cancelamento' AND ref_tipo IN ('saque','emprestimo')   THEN  valor
             WHEN tipo IN ('deposito','pagamento') THEN  valor
             ELSE -valor
           END
         ), 0) AS saldo
         FROM caixa_transacoes
-        WHERE empresa_id=$1 AND (cancelado IS NULL OR cancelado = false)
+        WHERE empresa_id=$1
+          AND (cancelado IS NULL OR cancelado = false)
+          AND tipo != 'cancelamento'
       `, [eid]),
       pool.query(`
         SELECT t.*, a.nome AS admin_nome
