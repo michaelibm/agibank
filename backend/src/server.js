@@ -34,6 +34,12 @@ pool.query(`
 `).then(() => console.log('[db] pre_cadastros limite OK'))
   .catch(e  => console.error('[db] migrate limite error:', e.message));
 
+pool.query(`
+  ALTER TABLE clientes
+    ADD COLUMN IF NOT EXISTS pode_pagar_juros BOOLEAN DEFAULT false
+`).then(() => console.log('[db] clientes pode_pagar_juros OK'))
+  .catch(e  => console.error('[db] migrate pode_pagar_juros error:', e.message));
+
 const authRoutes        = require('./routes/auth');
 const emprestimosRoutes = require('./routes/emprestimos');
 const adminRoutes       = require('./routes/admin');

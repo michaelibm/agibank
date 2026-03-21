@@ -15,10 +15,14 @@ export default function Solicitar({ onDone }) {
   const juros = +(valor*.30).toFixed(2);
   const total = +(valor*1.30).toFixed(2);
 
-  const handleInput = e => { setCents(e.target.value.replace(/\D/g,'')); setErr(''); setOk(''); };
+  const handleInput = e => {
+    const raw = e.target.value.replace(/\D/g,'');
+    setCents(raw);
+    setErr(''); setOk('');
+  };
 
   const abrirTermo = () => {
-    if(valor<100)   return setErr('Valor mínimo: R$ 100,00.');
+    if(valor<100)   return setErr('Valor mínimo: R$ 50,00.');
     if(valor>50000) return setErr('Valor máximo: R$ 50.000,00.');
     setErr('');
     setModal(true);
@@ -63,18 +67,13 @@ export default function Solicitar({ onDone }) {
             style={S.bigInput}
           />
         </div>
-        <input type="range" min="0" max="5000000" step="10000"
-          value={parseInt(cents||'0')}
-          onChange={e=>{setCents(e.target.value);setErr('');setOk('');}}
-          style={S.slider}
-        />
-        <div style={S.sliderLabels}><span>R$ 100</span><span>R$ 50.000</span></div>
+        <p style={S.hint}>Mínimo R$ 50,00 · Máximo R$ 50.000,00</p>
       </Card>
 
       {/* Simulação */}
-      {valor>=100 && (
+      {valor>=50 && (
         <Card style={S.sim}>
-          <p style={S.simTitle}>🌸 Simulação</p>
+          <p style={S.simTitle}> Simulação</p>
           <div style={S.simRow}>
             <span style={{color:'var(--muted)'}}>Valor solicitado</span>
             <span style={{fontWeight:700}}>{fmt(valor)}</span>
@@ -153,8 +152,7 @@ const S = {
   inputWrap:   { display:'flex', alignItems:'center', gap:8, marginBottom:16 },
   rs:          { fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:22, color:'var(--muted)' },
   bigInput:    { border:'none', background:'none', color:'var(--text)', fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:34, flex:1, outline:'none', width:'100%' },
-  slider:      { width:'100%', accentColor:'var(--pink)', cursor:'pointer', marginBottom:6 },
-  sliderLabels:{ display:'flex', justifyContent:'space-between', fontSize:11, color:'var(--muted)', fontWeight:600 },
+  hint:        { fontSize:11, color:'var(--muted)', fontWeight:600, marginTop:4 },
   sim:         { marginBottom:16 },
   simTitle:    { fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:16, marginBottom:14 },
   simRow:      { display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:'1px solid var(--border2)' },

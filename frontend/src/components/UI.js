@@ -121,7 +121,7 @@ const STATUS = {
   em_analise:{ label:'Em Análise', color:'#E65100', bg:'#FFF3E0', border:'#FFCC80' },
   aprovado:  { label:'Aprovado',   color:'#2E7D32', bg:'#E8F5E9', border:'#A5D6A7' },
   reprovado: { label:'Reprovado',  color:'#C62828', bg:'#FFEBEE', border:'#EF9A9A' },
-  pago:      { label:'Pago',       color:'#AD1457', bg:'#FCE4EC', border:'#F48FB1' },
+  pago:      { label:'Pago',       color:'#1B5E20', bg:'#E8F5E9', border:'#A5D6A7' },
   vencido:   { label:'Vencido',    color:'#6A1B9A', bg:'#F3E5F5', border:'#CE93D8' },
 };
 

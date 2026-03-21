@@ -45,7 +45,7 @@ export default function AdminClientes() {
       pix_tipo: c.pix_tipo||'', pix_chave: c.pix_chave||'',
       cidade: c.cidade||'', estado: c.estado||'',
       cep: c.cep||'', rua: c.rua||'', numero: c.numero||'', bairro: c.bairro||'',
-      senha: '',
+      senha: '', pode_pagar_juros: !!c.pode_pagar_juros,
     });
     setEditando(c);
     setMsg('');
@@ -70,6 +70,7 @@ export default function AdminClientes() {
         pix_tipo:form.pix_tipo, pix_chave:form.pix_chave,
         cidade:form.cidade, estado:form.estado,
         cep:form.cep, rua:form.rua, numero:form.numero, bairro:form.bairro,
+        pode_pagar_juros: form.pode_pagar_juros,
       });
       closeModal(); load();
     } catch(e){ setMsg('❌ '+e.message); }
@@ -203,6 +204,20 @@ export default function AdminClientes() {
               </select>
               <input value={form.pix_chave} onChange={f('pix_chave')} placeholder="Chave Pix"/>
 
+              {!criando && (<>
+                <p style={M.section}>Permissões</p>
+                <div style={T.toggleRow}
+                  onClick={()=>setForm(p=>({...p,pode_pagar_juros:!p.pode_pagar_juros}))}>
+                  <div>
+                    <p style={T.toggleLabel}>Pagar só os juros</p>
+                    <p style={T.toggleSub}>Permite renovar o empréstimo pagando apenas os juros (+30 dias)</p>
+                  </div>
+                  <div style={{...T.track, background: form.pode_pagar_juros ? 'var(--pink)' : 'var(--border)'}}>
+                    <div style={{...T.thumb, transform: form.pode_pagar_juros ? 'translateX(20px)' : 'translateX(2px)'}}/>
+                  </div>
+                </div>
+              </>)}
+
               <Btn
                 onClick={criando?salvarNovo:salvarEdicao}
                 loading={busy}
@@ -235,6 +250,14 @@ const S = {
   editBtn: { flex:1, background:'none', border:'1.5px solid var(--pink)', color:'var(--pink)', borderRadius:10, padding:'9px', fontSize:13, fontFamily:'inherit', fontWeight:700, cursor:'pointer' },
   delBtn:  { flex:1, background:'none', border:'1.5px solid #FFCDD2', color:'var(--red)', borderRadius:10, padding:'9px', fontSize:13, fontFamily:'inherit', fontWeight:700, cursor:'pointer' },
   newBtn:  { background:'linear-gradient(135deg,#E91E8C,#F06292)', color:'#fff', border:'none', borderRadius:14, padding:'10px 18px', fontSize:13, fontWeight:700, fontFamily:'inherit', cursor:'pointer', boxShadow:'0 4px 14px rgba(233,30,140,.3)', whiteSpace:'nowrap' },
+};
+
+const T = {
+  toggleRow:  { display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, padding:'12px 0', cursor:'pointer' },
+  toggleLabel:{ fontWeight:700, fontSize:14, color:'var(--text)' },
+  toggleSub:  { fontSize:12, color:'var(--muted)', marginTop:2 },
+  track:      { width:44, height:26, borderRadius:13, flexShrink:0, position:'relative', transition:'background .2s', cursor:'pointer' },
+  thumb:      { position:'absolute', top:3, width:20, height:20, borderRadius:'50%', background:'#fff', boxShadow:'0 1px 4px rgba(0,0,0,.25)', transition:'transform .2s' },
 };
 
 const M = {

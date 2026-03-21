@@ -13,7 +13,7 @@ const CAT = {
   vencido: { label: 'Vencido',  dot: '#F44336', bg: '#FFEBEE', border: '#FFCDD2', text: '#C62828' },
   atencao: { label: 'Atenção',  dot: '#FF9800', bg: '#FFF3E0', border: '#FFCC80', text: '#E65100' },
   emdia:   { label: 'Em Dia',   dot: '#4CAF50', bg: '#F1F8E9', border: '#C5E1A5', text: '#2E7D32' },
-  pago:    { label: 'Pago',     dot: '#78909C', bg: '#ECEFF1', border: '#CFD8DC', text: '#455A64' },
+  pago:    { label: 'Pago',     dot: '#2E7D32', bg: '#E8F5E9', border: '#A5D6A7', text: '#1B5E20' },
 };
 
 const FILTROS = [
@@ -223,13 +223,15 @@ export default function ControlePrazos() {
                       <Btn variant="success" onClick={() => marcarPago(l.id)} loading={busy[l.id]}>
                         Quitar Empréstimo — {fmt(l.valor_com_juros)}
                       </Btn>
-                      <button
-                        onClick={() => pagarJuros(l.id, parseFloat(l.valor), l.cliente_nome)}
-                        disabled={renovBusy[l.id]}
-                        style={S.jurosBtn}
-                      >
-                        {renovBusy[l.id] ? '...' : `Pagar Só os Juros — ${fmt(parseFloat(l.valor)*0.30)} (+30 dias)`}
-                      </button>
+                      {l.pode_pagar_juros && (
+                        <button
+                          onClick={() => pagarJuros(l.id, parseFloat(l.valor), l.cliente_nome)}
+                          disabled={renovBusy[l.id]}
+                          style={S.jurosBtn}
+                        >
+                          {renovBusy[l.id] ? '...' : `Pagar Só os Juros — ${fmt(parseFloat(l.valor)*0.30)} (+30 dias)`}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
