@@ -2,16 +2,16 @@ import React from 'react';
 
 // ─── LOGO ─────────────────────────────────────────────────────────────────
 export const Logo = ({ size = 'md' }) => {
-  const h = size === 'sm' ? 40 : 58;
+  const wrap = size === 'sm' ? 40 : 52;
+  const img  = size === 'sm' ? 36 : 46;
   return (
-    <img
-      src="/EMG.png"
-      alt="Logo"
-      style={{
-        height: h, width:'auto', objectFit:'contain', display:'block',
-        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.22))',
-      }}
-    />
+    <div style={{ width:wrap, height:wrap, borderRadius:14, background:'linear-gradient(135deg,#E91E8C,#F48FB1)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 14px rgba(233,30,140,0.35)', overflow:'hidden', flexShrink:0 }}>
+      <img
+        src="/EMG.png"
+        alt="Logo"
+        style={{ width:img, height:img, objectFit:'cover', display:'block', mixBlendMode:'screen' }}
+      />
+    </div>
   );
 };
 
