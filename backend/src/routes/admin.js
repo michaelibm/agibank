@@ -292,8 +292,12 @@ router.delete('/clientes/:id', adminMiddleware, async (req, res) => {
 router.patch('/clientes/:id', adminMiddleware, async (req, res) => {
   const eid = req.user.empresa_id;
   const { nome, email, rg, pix_tipo, pix_chave, cidade, estado, cep, rua, numero, bairro, pode_pagar_juros, limite_credito } = req.body;
+  const limite = parseFloat(limite_credito)||0;
+  const client = await pool.connect();
   try {
-    const { rows } = await pool.query(`
+    await client.query('BEGIN');
+
+    const { rows } = await client.query(`
       UPDATE clientes SET
         nome=$1, email=$2, rg=$3, pix_tipo=$4, pix_chave=$5,
         cidade=$6, estado=$7, cep=$8, rua=$9, numero=$10, bairro=$11,
@@ -302,12 +306,26 @@ router.patch('/clientes/:id', adminMiddleware, async (req, res) => {
     `, [nome, email||null, rg||null, pix_tipo||null, pix_chave||null,
         cidade||null, estado||null, cep||null, rua||null, numero||null, bairro||null,
         pode_pagar_juros===true||pode_pagar_juros==='true'||false,
-        parseFloat(limite_credito)||0,
-        req.params.id, eid]);
-    if (!rows.length) return res.status(404).json({ error:'Cliente não encontrado.' });
+        limite, req.params.id, eid]);
+
+    if (!rows.length) { await client.query('ROLLBACK'); return res.status(404).json({ error:'Cliente não encontrado.' }); }
+
+    // Sincroniza limite no pré-cadastro pelo telefone do cliente
+    await client.query(`
+      UPDATE pre_cadastros
+        SET limite_credito=$1
+      WHERE empresa_id=$2
+        AND regexp_replace(telefone,'\\D','','g') = regexp_replace($3,'\\D','','g')
+    `, [limite, eid, rows[0].telefone]);
+
+    await client.query('COMMIT');
     const { senha_hash, ...cliente } = rows[0];
     return res.json(cliente);
-  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao atualizar.' }); }
+  } catch(e){
+    await client.query('ROLLBACK');
+    console.error(e);
+    return res.status(500).json({ error:'Erro ao atualizar.' });
+  } finally { client.release(); }
 });
 
 // ── GET /api/admin/clientes
