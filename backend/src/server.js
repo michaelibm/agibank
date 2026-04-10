@@ -7,6 +7,9 @@ const rateLimit  = require('express-rate-limit');
 
 const pool = require('./db/pool');
 
+// ── Jobs agendados
+require('./jobs/avisoVencimento');
+
 // ── Auto-migrate: garante tabelas novas em bancos existentes
 pool.query(`
   CREATE TABLE IF NOT EXISTS caixa_transacoes (
