@@ -46,6 +46,7 @@ export default function AdminClientes() {
       cidade: c.cidade||'', estado: c.estado||'',
       cep: c.cep||'', rua: c.rua||'', numero: c.numero||'', bairro: c.bairro||'',
       senha: '', pode_pagar_juros: !!c.pode_pagar_juros,
+      limite_credito: c.limite_credito||'',
     });
     setEditando(c);
     setMsg('');
@@ -71,6 +72,7 @@ export default function AdminClientes() {
         cidade:form.cidade, estado:form.estado,
         cep:form.cep, rua:form.rua, numero:form.numero, bairro:form.bairro,
         pode_pagar_juros: form.pode_pagar_juros,
+        limite_credito: parseFloat(form.limite_credito)||0,
       });
       closeModal(); load();
     } catch(e){ setMsg('❌ '+e.message); }
@@ -141,11 +143,18 @@ export default function AdminClientes() {
           {expanded===c.id && (
             <div style={S.details}>
               {[
-                {l:'CPF',v:c.cpf},{l:'RG',v:c.rg||'—'},{l:'E-mail',v:c.email||'—'},
-                {l:'Endereço',v:c.rua?`${c.rua}, ${c.numero} — ${c.bairro}`:'—'},
-                {l:'Chave Pix',v:c.pix_tipo?`${c.pix_tipo}: ${c.pix_chave}`:'—'},
-                {l:'LGPD',v:c.lgpd_aceito?`✅ Aceito em ${fmtDate(c.lgpd_data)}`:'—'},
-                {l:'Cadastro',v:fmtDate(c.criado_em)},
+                {l:'CPF',         v: c.cpf},
+                {l:'RG',          v: c.rg||'—'},
+                {l:'E-mail',      v: c.email||'—'},
+                {l:'Telefone',    v: maskPhone(c.telefone||'')},
+                {l:'CEP',         v: c.cep||'—'},
+                {l:'Rua',         v: c.rua ? `${c.rua}, ${c.numero||'s/n'}` : '—'},
+                {l:'Bairro',      v: c.bairro||'—'},
+                {l:'Cidade/UF',   v: c.cidade ? `${c.cidade} / ${c.estado||'—'}` : '—'},
+                {l:'Chave Pix',   v: c.pix_tipo ? `${c.pix_tipo}: ${c.pix_chave}` : '—'},
+                {l:'Limite',      v: c.limite_credito > 0 ? fmt(c.limite_credito) : 'Sem limite definido'},
+                {l:'LGPD',        v: c.lgpd_aceito ? `Aceito em ${fmtDate(c.lgpd_data)}` : '—'},
+                {l:'Cadastro',    v: fmtDate(c.criado_em)},
               ].map(({l,v})=>(
                 <div key={l} style={S.detRow}>
                   <span style={S.detLabel}>{l}</span>
@@ -205,6 +214,14 @@ export default function AdminClientes() {
               <input value={form.pix_chave} onChange={f('pix_chave')} placeholder="Chave Pix"/>
 
               {!criando && (<>
+                <p style={M.section}>Limite de Crédito</p>
+                <input
+                  value={form.limite_credito}
+                  onChange={f('limite_credito')}
+                  placeholder="Limite máximo (R$) — 0 = sem limite"
+                  type="number" min="0" step="100" inputMode="decimal"
+                />
+
                 <p style={M.section}>Permissões</p>
                 <div style={T.toggleRow}
                   onClick={()=>setForm(p=>({...p,pode_pagar_juros:!p.pode_pagar_juros}))}>

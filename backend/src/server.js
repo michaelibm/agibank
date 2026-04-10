@@ -41,6 +41,12 @@ pool.query(`
   .catch(e  => console.error('[db] migrate pode_pagar_juros error:', e.message));
 
 pool.query(`
+  ALTER TABLE clientes
+    ADD COLUMN IF NOT EXISTS limite_credito NUMERIC(12,2) DEFAULT 0
+`).then(() => console.log('[db] clientes limite_credito OK'))
+  .catch(e  => console.error('[db] migrate clientes limite error:', e.message));
+
+pool.query(`
   ALTER TABLE caixa_transacoes
     ADD COLUMN IF NOT EXISTS cancelado BOOLEAN DEFAULT false,
     ADD COLUMN IF NOT EXISTS ref_tipo  TEXT

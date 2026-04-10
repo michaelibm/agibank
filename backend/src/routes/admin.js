@@ -291,17 +291,18 @@ router.delete('/clientes/:id', adminMiddleware, async (req, res) => {
 // ── PATCH /api/admin/clientes/:id — editar cliente
 router.patch('/clientes/:id', adminMiddleware, async (req, res) => {
   const eid = req.user.empresa_id;
-  const { nome, email, rg, pix_tipo, pix_chave, cidade, estado, cep, rua, numero, bairro, pode_pagar_juros } = req.body;
+  const { nome, email, rg, pix_tipo, pix_chave, cidade, estado, cep, rua, numero, bairro, pode_pagar_juros, limite_credito } = req.body;
   try {
     const { rows } = await pool.query(`
       UPDATE clientes SET
         nome=$1, email=$2, rg=$3, pix_tipo=$4, pix_chave=$5,
         cidade=$6, estado=$7, cep=$8, rua=$9, numero=$10, bairro=$11,
-        pode_pagar_juros=$12
-      WHERE id=$13 AND empresa_id=$14 RETURNING *
+        pode_pagar_juros=$12, limite_credito=$13
+      WHERE id=$14 AND empresa_id=$15 RETURNING *
     `, [nome, email||null, rg||null, pix_tipo||null, pix_chave||null,
         cidade||null, estado||null, cep||null, rua||null, numero||null, bairro||null,
         pode_pagar_juros===true||pode_pagar_juros==='true'||false,
+        parseFloat(limite_credito)||0,
         req.params.id, eid]);
     if (!rows.length) return res.status(404).json({ error:'Cliente não encontrado.' });
     const { senha_hash, ...cliente } = rows[0];
@@ -314,9 +315,10 @@ router.get('/clientes', adminMiddleware, async (req, res) => {
   const eid = req.user.empresa_id;
   try {
     const { rows } = await pool.query(`
-      SELECT c.id,c.nome,c.cpf,c.rg,c.email,c.telefone,c.cidade,c.estado,
+      SELECT c.id,c.nome,c.cpf,c.rg,c.email,c.telefone,
+             c.cidade,c.estado,c.cep,c.rua,c.numero,c.bairro,
              c.pix_tipo,c.pix_chave,c.lgpd_aceito,c.lgpd_data,c.criado_em,
-             c.pode_pagar_juros,
+             c.pode_pagar_juros, c.limite_credito,
              COUNT(e.id) AS total_emprestimos, COALESCE(SUM(e.valor),0) AS total_valor
       FROM clientes c LEFT JOIN emprestimos e ON e.cliente_id=c.id
       WHERE c.empresa_id=$1 GROUP BY c.id ORDER BY c.criado_em DESC
