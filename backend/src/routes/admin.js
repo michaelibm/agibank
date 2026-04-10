@@ -458,6 +458,54 @@ router.patch('/emprestimos/:id/renovar', adminMiddleware, async (req, res) => {
   } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao renovar empréstimo.' }); }
 });
 
+// ── PATCH /api/admin/emprestimos/:id/vencimento — editar data de vencimento
+router.patch('/emprestimos/:id/vencimento', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  const { data_vencimento } = req.body;
+  if (!data_vencimento) return res.status(400).json({ error:'Data obrigatória.' });
+  try {
+    const { rows } = await pool.query(
+      `UPDATE emprestimos SET data_vencimento=$1, atualizado_em=NOW()
+       WHERE id=$2 AND empresa_id=$3 AND status='aprovado' RETURNING *`,
+      [data_vencimento, req.params.id, eid]
+    );
+    if (!rows.length) return res.status(404).json({ error:'Não encontrado ou não está ativo.' });
+    return res.json(rows[0]);
+  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao atualizar vencimento.' }); }
+});
+
+// ── POST /api/admin/emprestimos/:id/avisar — dispara webhook de aviso manual
+router.post('/emprestimos/:id/avisar', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  try {
+    const { rows } = await pool.query(`
+      SELECT e.*, c.nome, c.telefone, c.email, c.cpf, c.pix_tipo, c.pix_chave
+      FROM emprestimos e JOIN clientes c ON c.id=e.cliente_id
+      WHERE e.id=$1 AND e.empresa_id=$2 AND e.status='aprovado'
+    `, [req.params.id, eid]);
+    if (!rows.length) return res.status(404).json({ error:'Não encontrado ou não está ativo.' });
+    const emp = rows[0];
+    const dias = Math.ceil((new Date(emp.data_vencimento) - new Date()) / (1000*60*60*24));
+    await notifyN8N(await getWebhook(eid), {
+      evento:          'aviso_vencimento',
+      dias_restantes:  dias,
+      emprestimo_id:   emp.id,
+      valor:           parseFloat(emp.valor),
+      valor_com_juros: parseFloat(emp.valor_com_juros),
+      data_vencimento: emp.data_vencimento,
+      cliente: {
+        nome:      emp.nome,
+        telefone:  emp.telefone,
+        email:     emp.email,
+        cpf:       emp.cpf,
+        pix_tipo:  emp.pix_tipo,
+        pix_chave: emp.pix_chave,
+      },
+    });
+    return res.json({ ok: true, dias_restantes: dias });
+  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao enviar aviso.' }); }
+});
+
 // ── GET /api/admin/caixa  — saldo + últimas transações
 router.get('/caixa', adminMiddleware, async (req, res) => {
   const eid = req.user.empresa_id;

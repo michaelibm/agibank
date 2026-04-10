@@ -29,13 +29,17 @@ const Dot = ({ color, size = 10 }) => (
 );
 
 export default function ControlePrazos() {
-  const [lista,    setLista]    = useState([]);
-  const [loading,  setLoading]  = useState(true);
-  const [filtro,   setFiltro]   = useState('todos');
-  const [busy,     setBusy]     = useState({});
-  const [renovBusy,setRenovBusy]= useState({});
-  const [msg,      setMsg]      = useState('');
-  const [expanded, setExpanded] = useState(null);
+  const [lista,      setLista]      = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [filtro,     setFiltro]     = useState('todos');
+  const [busy,       setBusy]       = useState({});
+  const [renovBusy,  setRenovBusy]  = useState({});
+  const [avisBusy,   setAvisBusy]   = useState({});
+  const [msg,        setMsg]        = useState('');
+  const [expanded,   setExpanded]   = useState(null);
+  const [editVenc,   setEditVenc]   = useState(null);  // { id, data_vencimento }
+  const [novaData,   setNovaData]   = useState('');
+  const [vencBusy,   setVencBusy]   = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -52,6 +56,34 @@ export default function ControlePrazos() {
       load(); setTimeout(() => setMsg(''), 3000);
     } catch (e) { setMsg('Erro: ' + e.message); }
     finally { setBusy(b => ({ ...b, [id]: false })); }
+  };
+
+  const avisarCliente = async (id, dias) => {
+    setAvisBusy(b => ({ ...b, [id]: true }));
+    try {
+      await api.avisarCliente(id);
+      setMsg(`Aviso enviado! Vence em ${dias} dia(s).`);
+      setTimeout(() => setMsg(''), 4000);
+    } catch (e) { setMsg('Erro: ' + e.message); }
+    finally { setAvisBusy(b => ({ ...b, [id]: false })); }
+  };
+
+  const abrirEditVenc = (l) => {
+    const iso = l.data_vencimento ? new Date(l.data_vencimento).toISOString().slice(0,10) : '';
+    setNovaData(iso);
+    setEditVenc(l);
+  };
+
+  const salvarVencimento = async () => {
+    if (!novaData) return;
+    setVencBusy(true);
+    try {
+      await api.editarVencimento(editVenc.id, { data_vencimento: novaData });
+      setEditVenc(null);
+      setMsg('Data de vencimento atualizada.');
+      load(); setTimeout(() => setMsg(''), 3000);
+    } catch (e) { setMsg('Erro: ' + e.message); }
+    finally { setVencBusy(false); }
   };
 
   const pagarJuros = async (id, valor, nome) => {
@@ -232,6 +264,18 @@ export default function ControlePrazos() {
                           {renovBusy[l.id] ? '...' : `Pagar Só os Juros — ${fmt(parseFloat(l.valor)*0.30)} (+30 dias)`}
                         </button>
                       )}
+                      <div style={{ display:'flex', gap:8 }}>
+                        <button onClick={() => abrirEditVenc(l)} style={S.editVencBtn}>
+                          Editar Vencimento
+                        </button>
+                        <button
+                          onClick={() => avisarCliente(l.id, dias)}
+                          disabled={avisBusy[l.id]}
+                          style={S.avisarBtn}
+                        >
+                          {avisBusy[l.id] ? '...' : `Avisar Cliente${dias !== null ? ` (${dias}d)` : ''}`}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -242,6 +286,30 @@ export default function ControlePrazos() {
       })}
 
       <div style={{ height:32 }}/>
+
+      {/* Modal editar vencimento */}
+      {editVenc && (
+        <div style={S.overlay} onClick={() => setEditVenc(null)}>
+          <div style={S.modalBox} onClick={e => e.stopPropagation()}>
+            <p style={S.modalTitle}>Editar Vencimento</p>
+            <p style={{ color:'var(--muted)', fontSize:13, marginBottom:16 }}>
+              Crédito #{editVenc.id} — {editVenc.cliente_nome}
+            </p>
+            <input
+              type="date"
+              value={novaData}
+              onChange={e => setNovaData(e.target.value)}
+              style={{ width:'100%', padding:'12px', borderRadius:12, border:'1.5px solid var(--border)', fontSize:15, fontFamily:'inherit', marginBottom:16, boxSizing:'border-box' }}
+            />
+            <div style={{ display:'flex', gap:10 }}>
+              <button onClick={() => setEditVenc(null)} style={S.cancelBtn}>Cancelar</button>
+              <Btn onClick={salvarVencimento} loading={vencBusy} style={{ flex:1 }}>
+                Salvar
+              </Btn>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -283,4 +351,10 @@ const S = {
   detLabel:    { color:'var(--muted)', fontSize:12, fontWeight:600, flexShrink:0 },
   detVal:      { fontSize:12, fontWeight:600, textAlign:'right', wordBreak:'break-all', maxWidth:'65%' },
   jurosBtn:    { width:'100%', background:'#EDE7F6', border:'1.5px solid #9575CD', borderRadius:12, padding:'12px 14px', fontSize:13, fontFamily:'inherit', fontWeight:700, color:'#4527A0', cursor:'pointer', textAlign:'center' },
+  editVencBtn: { flex:1, background:'none', border:'1.5px solid var(--border)', borderRadius:12, padding:'10px 8px', fontSize:12, fontFamily:'inherit', fontWeight:700, color:'var(--muted)', cursor:'pointer' },
+  avisarBtn:   { flex:1, background:'#E3F2FD', border:'1.5px solid #90CAF9', borderRadius:12, padding:'10px 8px', fontSize:12, fontFamily:'inherit', fontWeight:700, color:'#1565C0', cursor:'pointer' },
+  overlay:     { position:'fixed', inset:0, background:'rgba(0,0,0,.55)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 },
+  modalBox:    { background:'#fff', borderRadius:20, padding:'24px 20px', width:'100%', maxWidth:380, boxShadow:'0 20px 60px rgba(0,0,0,.2)' },
+  modalTitle:  { fontFamily:"'Playfair Display',serif", fontWeight:700, fontSize:18, color:'var(--text)', marginBottom:6 },
+  cancelBtn:   { flex:1, background:'none', border:'1.5px solid var(--border)', borderRadius:12, padding:'12px 8px', fontSize:14, fontFamily:'inherit', fontWeight:700, color:'var(--muted)', cursor:'pointer' },
 };
