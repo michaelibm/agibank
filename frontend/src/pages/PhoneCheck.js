@@ -27,7 +27,7 @@ export default function PhoneCheck({ onFound, onLogin }) {
       <div style={S.inner}>
         <div style={S.hero}>
           <div style={S.logoBox}><Logo/></div>
-          <h1 style={S.heroTitle}>Primeiro Acesso 🌸</h1>
+          <h1 style={S.heroTitle}>Primeiro Acesso </h1>
           <p style={S.heroSub}>Verifique seu número para criar sua conta</p>
         </div>
 
