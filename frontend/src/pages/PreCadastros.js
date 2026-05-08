@@ -3,13 +3,16 @@ import { Card, Btn, Alert, Spinner, maskPhone, fmt } from '../components/UI';
 import { api } from '../services/api';
 
 export default function PreCadastros() {
-  const [lista,   setLista]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [nome,    setNome]    = useState('');
-  const [tel,     setTel]     = useState('');
-  const [limite,  setLimite]  = useState('');
-  const [busy,    setBusy]    = useState(false);
-  const [msg,     setMsg]     = useState('');
+  const [lista,     setLista]     = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [nome,      setNome]      = useState('');
+  const [tel,       setTel]       = useState('');
+  const [limite,    setLimite]    = useState('');
+  const [busy,      setBusy]      = useState(false);
+  const [msg,       setMsg]       = useState('');
+  const [editId,    setEditId]    = useState(null);
+  const [editVal,   setEditVal]   = useState('');
+  const [editBusy,  setEditBusy]  = useState(false);
 
   const load = () => { setLoading(true); api.preCadastros().then(setLista).finally(()=>setLoading(false)); };
   useEffect(load,[]);
@@ -26,6 +29,18 @@ export default function PreCadastros() {
       load(); setTimeout(()=>setMsg(''),3000);
     } catch(e){ setMsg('❌ '+e.message); }
     finally   { setBusy(false); }
+  };
+
+  const abrirEdit = (p) => { setEditId(p.id); setEditVal(p.limite_credito || ''); };
+  const fecharEdit = () => { setEditId(null); setEditVal(''); };
+
+  const salvarLimite = async () => {
+    setEditBusy(true);
+    try {
+      await api.editarPreCadastro(editId, { limite_credito: parseFloat(editVal) || 0 });
+      fecharEdit(); load();
+    } catch(e){ setMsg('❌ ' + e.message); }
+    finally { setEditBusy(false); }
   };
 
   const remover = async (id, nome) => {
@@ -72,20 +87,40 @@ export default function PreCadastros() {
             <div style={{flex:1}}>
               <p style={{fontWeight:700,fontSize:15,color:'var(--text)'}}>{p.nome}</p>
               <p style={{color:'var(--muted)',fontSize:13}}>{maskPhone(p.telefone)}</p>
-              {p.limite_credito > 0 && (
-                <p style={{fontSize:12,color:'var(--pink)',fontWeight:700,marginTop:2}}>
-                  Limite: {fmt(p.limite_credito)}
-                </p>
-              )}
+              <p style={{fontSize:12,color:'var(--pink)',fontWeight:700,marginTop:2}}>
+                Limite: {p.limite_credito > 0 ? fmt(p.limite_credito) : 'Sem limite'}
+              </p>
             </div>
             <div style={{textAlign:'right',display:'flex',flexDirection:'column',alignItems:'flex-end',gap:4}}>
               {p.cliente_id
                 ? <span style={S.tagOk}>Cadastrado</span>
                 : <span style={S.tagWait}>Aguardando</span>
               }
+              <button onClick={()=>abrirEdit(p)} style={S.editBtn}>Editar limite</button>
               <button onClick={()=>remover(p.id, p.nome)} style={S.removeBtn}>Excluir</button>
             </div>
           </div>
+
+          {/* edição inline de limite */}
+          {editId === p.id && (
+            <div style={S.editRow}>
+              <div style={{position:'relative',flex:1}}>
+                <span style={S.rsPre}>R$</span>
+                <input
+                  value={editVal}
+                  onChange={e=>setEditVal(e.target.value)}
+                  type="number" min="0" step="100" inputMode="decimal"
+                  placeholder="Novo limite"
+                  style={{paddingLeft:36, margin:0}}
+                  autoFocus
+                />
+              </div>
+              <button onClick={salvarLimite} disabled={editBusy} style={S.saveBtn}>
+                {editBusy ? '...' : 'Salvar'}
+              </button>
+              <button onClick={fecharEdit} style={S.cancelBtn}>✕</button>
+            </div>
+          )}
         </Card>
       ))}
     </div>
@@ -103,5 +138,10 @@ const S = {
   itemRow:  { display:'flex', alignItems:'center', gap:12 },
   tagOk:    { background:'#E8F5E9', color:'#2E7D32', border:'1.5px solid #A5D6A7', borderRadius:12, padding:'3px 10px', fontSize:11, fontWeight:700 },
   tagWait:  { background:'#FFF3E0', color:'#E65100', border:'1.5px solid #FFCC80', borderRadius:12, padding:'3px 10px', fontSize:11, fontWeight:700 },
-  removeBtn:{ background:'none', border:'none', color:'var(--red)', cursor:'pointer', fontSize:12, marginTop:4, fontFamily:'inherit', fontWeight:600 },
+  editBtn:  { background:'none', border:'none', color:'var(--pink)', cursor:'pointer', fontSize:12, fontFamily:'inherit', fontWeight:700 },
+  removeBtn:{ background:'none', border:'none', color:'var(--red)', cursor:'pointer', fontSize:12, fontFamily:'inherit', fontWeight:600 },
+  editRow:  { display:'flex', alignItems:'center', gap:8, marginTop:12, paddingTop:12, borderTop:'1px solid var(--border2)' },
+  rsPre:    { position:'absolute', left:14, top:'50%', transform:'translateY(-50%)', color:'var(--muted)', fontSize:13, fontWeight:600, pointerEvents:'none' },
+  saveBtn:  { background:'linear-gradient(135deg,#E91E8C,#F06292)', color:'#fff', border:'none', borderRadius:12, padding:'11px 18px', fontSize:13, fontWeight:700, fontFamily:'inherit', cursor:'pointer', whiteSpace:'nowrap' },
+  cancelBtn:{ background:'none', border:'1.5px solid var(--border)', borderRadius:12, padding:'11px 12px', fontSize:13, fontWeight:700, fontFamily:'inherit', cursor:'pointer', color:'var(--muted)' },
 };

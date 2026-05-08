@@ -394,6 +394,23 @@ router.post('/pre-cadastros', adminMiddleware, async (req, res) => {
   }
 });
 
+router.patch('/pre-cadastros/:id', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  const { limite_credito, nome } = req.body;
+  try {
+    const { rows } = await pool.query(
+      `UPDATE pre_cadastros SET
+         limite_credito = COALESCE($1, limite_credito),
+         nome           = COALESCE($2, nome)
+       WHERE id=$3 AND empresa_id=$4 RETURNING *`,
+      [limite_credito != null ? parseFloat(limite_credito)||0 : null,
+       nome || null, req.params.id, eid]
+    );
+    if (!rows.length) return res.status(404).json({ error:'Não encontrado.' });
+    return res.json(rows[0]);
+  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao atualizar.' }); }
+});
+
 router.delete('/pre-cadastros/:id', adminMiddleware, async (req, res) => {
   const eid = req.user.empresa_id;
   try {
