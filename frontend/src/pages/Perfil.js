@@ -1,9 +1,29 @@
+import { useState } from 'react';
 import { Card, Btn, fmtDate, maskPhone } from '../components/UI';
 import { useAuth } from '../contexts/AuthContext';
 
+const APP_VERSION = '2.1';
+
 export default function Perfil() {
   const { user, logout } = useAuth();
+  const [updating, setUpdating] = useState(false);
   if(!user) return null;
+
+  const forcarAtualizacao = async () => {
+    setUpdating(true);
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    } finally {
+      window.location.reload(true);
+    }
+  };
 
   const rows = [
     { l:'Nome',        v:user.nome },
@@ -38,7 +58,12 @@ export default function Perfil() {
         ))}
       </Card>
 
-      <Btn variant="ghost" onClick={logout} style={{borderColor:'var(--red)',color:'var(--red)'}}>
+      <button onClick={forcarAtualizacao} disabled={updating} style={S.updateBtn}>
+        {updating ? 'Atualizando...' : 'Atualizar versão do app'}
+      </button>
+      <p style={S.version}>v{APP_VERSION}</p>
+
+      <Btn variant="ghost" onClick={logout} style={{borderColor:'var(--red)',color:'var(--red)',marginTop:8}}>
         Sair da Conta
       </Btn>
     </div>
@@ -56,4 +81,6 @@ const S = {
   row:           { display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 0', borderBottom:'1px solid var(--border2)', gap:12 },
   rowLabel:      { color:'var(--muted)', fontSize:13, flexShrink:0, fontWeight:600 },
   rowVal:        { fontSize:13, fontWeight:600, textAlign:'right', wordBreak:'break-all', maxWidth:'60%', color:'var(--text)' },
+  updateBtn:     { width:'100%', background:'#E3F2FD', border:'1.5px solid #90CAF9', borderRadius:14, padding:'13px', fontSize:14, fontFamily:'inherit', fontWeight:700, color:'#1565C0', cursor:'pointer', marginBottom:6 },
+  version:       { textAlign:'center', color:'var(--muted)', fontSize:11, marginBottom:12 },
 };

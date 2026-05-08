@@ -50,6 +50,7 @@ export const api = {
   adminClientes:      ()        => req('GET',   '/admin/clientes'),
   criarCliente:       (data)    => req('POST',  '/admin/clientes', data),
   editarCliente:      (id,data) => req('PATCH',  `/admin/clientes/${id}`, data),
+  trocarSenhaCliente: (id,nova_senha) => req('PATCH', `/admin/clientes/${id}/senha`, { nova_senha }),
   excluirCliente:     (id)      => req('DELETE', `/admin/clientes/${id}`),
   preCadastros:       ()              => req('GET',    '/admin/pre-cadastros'),
   addPreCadastro:     (telefone, nome, limite_credito) => req('POST', '/admin/pre-cadastros', { telefone, nome, limite_credito }),

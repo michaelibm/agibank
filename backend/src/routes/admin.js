@@ -328,6 +328,22 @@ router.patch('/clientes/:id', adminMiddleware, async (req, res) => {
   } finally { client.release(); }
 });
 
+// ── PATCH /api/admin/clientes/:id/senha — admin troca senha do cliente
+router.patch('/clientes/:id/senha', adminMiddleware, async (req, res) => {
+  const eid = req.user.empresa_id;
+  const { nova_senha } = req.body;
+  if (!nova_senha || nova_senha.length < 4) return res.status(400).json({ error:'Senha deve ter ao menos 4 caracteres.' });
+  try {
+    const hash = await bcrypt.hash(nova_senha, 10);
+    const { rowCount } = await pool.query(
+      'UPDATE clientes SET senha_hash=$1 WHERE id=$2 AND empresa_id=$3',
+      [hash, req.params.id, eid]
+    );
+    if (!rowCount) return res.status(404).json({ error:'Cliente não encontrado.' });
+    return res.json({ ok: true });
+  } catch(e){ console.error(e); return res.status(500).json({ error:'Erro ao atualizar senha.' }); }
+});
+
 // ── GET /api/admin/clientes
 router.get('/clientes', adminMiddleware, async (req, res) => {
   const eid = req.user.empresa_id;

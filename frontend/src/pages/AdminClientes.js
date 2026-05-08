@@ -47,6 +47,7 @@ export default function AdminClientes() {
       cep: c.cep||'', rua: c.rua||'', numero: c.numero||'', bairro: c.bairro||'',
       senha: '', pode_pagar_juros: !!c.pode_pagar_juros,
       limite_credito: c.limite_credito||'',
+      nova_senha: '',
     });
     setEditando(c);
     setMsg('');
@@ -74,6 +75,9 @@ export default function AdminClientes() {
         pode_pagar_juros: form.pode_pagar_juros,
         limite_credito: parseFloat(form.limite_credito)||0,
       });
+      if (form.nova_senha.trim()) {
+        await api.trocarSenhaCliente(editando.id, form.nova_senha.trim());
+      }
       closeModal(); load();
     } catch(e){ setMsg('❌ '+e.message); }
     finally   { setBusy(false); }
@@ -220,6 +224,14 @@ export default function AdminClientes() {
                   onChange={f('limite_credito')}
                   placeholder="Limite máximo (R$) — 0 = sem limite"
                   type="number" min="0" step="100" inputMode="decimal"
+                />
+
+                <p style={M.section}>Redefinir Senha</p>
+                <input
+                  value={form.nova_senha}
+                  onChange={f('nova_senha')}
+                  placeholder="Nova senha (deixe vazio para não alterar)"
+                  type="password"
                 />
 
                 <p style={M.section}>Permissões</p>
