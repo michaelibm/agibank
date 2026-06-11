@@ -47,12 +47,6 @@ router.post('/', authMiddleware, async (req, res) => {
   if (valor > 50000)            return res.status(400).json({ error: 'Valor máximo: R$ 50.000,00.' });
 
   try {
-    const { rows: ativos } = await pool.query(
-      `SELECT id FROM emprestimos WHERE cliente_id=$1 AND empresa_id=$2 AND status IN ('em_analise','aprovado')`,
-      [req.user.id, req.user.empresa_id]
-    );
-    if (ativos.length) return res.status(409).json({ error: 'Você já possui uma solicitação em andamento.' });
-
     // Verifica limite de crédito do pré-cadastro
     const { rows: pc } = await pool.query(
       `SELECT pc.limite_credito FROM pre_cadastros pc
